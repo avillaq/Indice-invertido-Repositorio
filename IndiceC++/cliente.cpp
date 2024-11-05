@@ -12,7 +12,7 @@ int main() {
     WSADATA wsaData;
     SOCKET sock = INVALID_SOCKET;
     struct sockaddr_in serv_addr;
-    char buffer[1024] = {0};
+    char buffer[4096] = {0};
 
     // Inicializar Winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -54,11 +54,11 @@ int main() {
 
         send(sock, input.c_str(), input.length(), 0);
 
-        int valread = recv(sock, buffer, 1024, 0);
+        int valread = recv(sock, buffer, 4096, 0);
         if (valread > 0) {
             cout << "Archivos encontrados:\n" << buffer << endl;
         } else {
-            cout << "No se recibió respuesta del servidor." << endl;
+            cout << "No se recibio respuesta del servidor." << endl;
         }
 
         memset(buffer, 0, sizeof(buffer));

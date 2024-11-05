@@ -14,22 +14,22 @@
 
 using namespace std;
 
-void manejarCliente(SOCKET clienteSocket) {
-    char buffer[4096] = {0};
-    srand(static_cast<unsigned int>(time(0))); // Seed para generar números aleatorios
-    Trie trie;
-    iniciar_indice_invertido(trie);
+Trie trie;
 
+void manejarCliente(SOCKET clienteSocket) {
+    const int bufferSize = 4096;
+    char buffer[bufferSize] = {0};
+    
     while (true) {
-        int valread = recv(clienteSocket, buffer, 1024, 0);
+        int valread = recv(clienteSocket, buffer, bufferSize, 0);
         if (valread <= 0) {
             cerr << "Error al leer del socket o cliente desconectado" << endl;
             break;
         }
 
-
         string entrada(buffer);
-        string respuesta = procesarEntrada(trie,entrada);
+        cout << "Mensaje recibido: " << entrada << endl;
+        string respuesta = procesarEntrada(trie, entrada);
 
         if (send(clienteSocket, respuesta.c_str(), static_cast<int>(respuesta.length()), 0) == -1) {
             cerr << "Error al enviar la respuesta" << endl;
@@ -85,6 +85,16 @@ int main() {
         return 1;
     }
 
+    cout << "Creando el indice invertido..." << endl;
+    iniciar_indice_invertido(trie);
+    cout << "Indice invertido creado" << endl;
+
+    char host[NI_MAXHOST];
+    char service[NI_MAXSERV];
+    getnameinfo((struct sockaddr*)&address, sizeof(address), host, NI_MAXHOST, service, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+    cout << "Servidor IP: " << host << "\nPuerto: " << ntohs(address.sin_port) << endl;
+    cout << "Servidor listo para recibir mensajes." << endl;
+    
     while (true) {
         if ((new_socket = accept(server_fd, (struct sockaddr*)&address, &addrlen)) == INVALID_SOCKET) {
             cerr << "Accept failed" << endl;
