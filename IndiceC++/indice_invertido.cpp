@@ -138,6 +138,18 @@ unordered_set<string> procesarEntrada(Trie& trie, string& entrada) { // procesa 
     }
 }
 
+string buscarDocumentosCompletos(unordered_map<string,json>& docsCompletos, unordered_set<string>& archivosEncontrados) {
+    json resultado;
+    vector<json> docsEncontradosCompletos;
+    for (const string& id : archivosEncontrados) {
+        json doc = docsCompletos[id];
+        docsEncontradosCompletos.push_back(doc);
+    }
+    resultado["resultado"] = docsEncontradosCompletos;
+    resultado["tamaño_resultado"] = docsEncontradosCompletos.size();
+    return resultado.dump(); // Convierte el JSON a string
+}
+
 void crearIndiceInvertido(unordered_map<string, string> archivosRecolectados, int inicio, int fin, unordered_set<string>& stopWords) {
     unordered_map<string, vector<string>> archivosProcesados;
 
@@ -177,11 +189,14 @@ int main() {
         return 1;
     }
 
+    unordered_map<string,json> docsCompletos;
+
     // Lectura de datos en archivo json
     ifstream f("./database/datos_repositorio.json");
     json data = json::parse(f);
     unordered_map<string, string> datosArchivos;
     for (auto& documento : data[2]["data"]) {
+        docsCompletos[documento["id_documento"]] = documento;
         datosArchivos[documento["id_documento"]] = documento["resumen"];
     }
     
@@ -231,9 +246,14 @@ int main() {
             }
             else { // si el resultado no es vacío, imprime los documentos pertenecientes a la palabra
                 cout << "La palabra '" << palabraBuscar << "' esta en los documentos:" << endl;
-                for (const string& ids : archivosEncontrados) {
-                    cout << "- " << ids << endl;
+                
+                /*
+                for (const string& id : archivosEncontrados) {
+                    cout << "- " << id << endl;
                 }
+                */
+                string resultadoJson = buscarDocumentosCompletos(docsCompletos, archivosEncontrados);
+                cout << "Documentos encontrados: \n" << resultadoJson << endl;
             }
         }
         

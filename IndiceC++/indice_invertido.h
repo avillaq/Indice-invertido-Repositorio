@@ -64,6 +64,9 @@ void reducirDatos(unordered_map<string, vector<string>>& datosAgrupados, Trie& t
 
 unordered_set<string> procesarEntrada(Trie& trie, string& entrada);
 
+// Funcion para buscar los documentos completos
+string buscarDocumentosCompletos(unordered_map<string,json>& docsCompletos, unordered_set<string>& archivosEncontrados);
+
 // Esta funcion se ejecutara en paralelo
 void crearIndiceInvertido(unordered_map<string, string> archivosRecolectados, int inicio, int fin, unordered_set<string>& stopWords);
 
