@@ -147,6 +147,7 @@ void reducirDatos(unordered_map<string, vector<string>>& datosAgrupados, Trie& t
 }
 
 unordered_set<string> procesarEntrada(Trie& trie, string& entrada) {
+    entrada = convertirMinuscula(entrada);
     istringstream stream(entrada);
     string token;
     vector<string> tokens;
@@ -314,8 +315,6 @@ int main() {
             salir = true;
         }
         else { 
-            palabraBuscar = convertirMinuscula(palabraBuscar);
-
             unordered_set<string> archivosEncontrados = procesarEntrada(trie,palabraBuscar); // buscamos la palabra y se almacena en archivosEncontrados
             if (archivosEncontrados.empty()) {  
                 cout << "La palabra '" << palabraBuscar << "' no esta en el indice invertido." << endl;
