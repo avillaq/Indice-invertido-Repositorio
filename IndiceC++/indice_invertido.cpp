@@ -2,6 +2,7 @@
 
 mutex mx;
 vector<unordered_map<string, vector<string>>> datosTotalesAgrupados;
+unordered_map<string,json> docsCompletos;
 
 Trie::Trie() {
     root = new Node(); // constructor, crea nodo inicial
@@ -104,7 +105,8 @@ void reducirDatos(unordered_map<string, vector<string>>& datosAgrupados, Trie& t
     }
 }
 
-unordered_set<string> procesarEntrada(Trie& trie, string& entrada) {
+string procesarEntrada(Trie& trie, string& entrada) {
+    entrada = convertirMinuscula(entrada);
     istringstream stream(entrada);
     string token;
     vector<string> tokens;
@@ -164,10 +166,19 @@ unordered_set<string> procesarEntrada(Trie& trie, string& entrada) {
         }
     }
 
-    return operandos.top();
+    unordered_set<string> archivosEncontrados = operandos.top();
+
+    if (archivosEncontrados.empty()) {  
+        return "";
+    }
+    else { // si el resultado no es vacío, imprime los documentos pertenecientes a la palabra              
+        string resultadoJson = buscarDocumentosCompletos(archivosEncontrados);
+        return resultadoJson;
+    }
+
 }
 
-string buscarDocumentosCompletos(unordered_map<string,json>& docsCompletos, unordered_set<string>& archivosEncontrados) {
+string buscarDocumentosCompletos(unordered_set<string>& archivosEncontrados) {
     json resultado;
     vector<json> docsEncontradosCompletos;
     for (const string& id : archivosEncontrados) {
@@ -201,10 +212,7 @@ void crearIndiceInvertido(unordered_map<string, string> archivosRecolectados, in
     datosTotalesAgrupados.push_back(datosAgrupados);
 }
 
-int main() {
-    // Iniciamos el cronómetro
-    auto start = chrono::high_resolution_clock::now();
-
+int iniciar_indice_invertido(Trie& trie) {
     // Cargamos las palabras vacias del archivo
     ifstream archivoEntrada("stop_words.txt");
     unordered_set<string> stopWords;
@@ -218,8 +226,6 @@ int main() {
         return 1;
     }
 
-    unordered_map<string,json> docsCompletos;
-
     // Lectura de datos en archivo json
     ifstream f("./database/datos_repositorio.json");
     json data = json::parse(f);
@@ -229,7 +235,6 @@ int main() {
         datosArchivos[documento["id_documento"]] = documento["resumen"];
     }
     
-    Trie trie;
     int numeroThreads = 8;
     thread threads[numeroThreads];
     int tamanoPorThread = datosArchivos.size() / numeroThreads;
@@ -251,41 +256,6 @@ int main() {
     for (auto& datos : datosTotalesAgrupados) {
         reducirDatos(datos, trie);        
     }
-
-    // Detenemos el cronómetro y mostramos el tiempo transcurrido
-    auto stop = chrono::high_resolution_clock::now();
-    cout << "tiempo total = " << chrono::duration_cast<chrono::milliseconds>(stop - start).count() << " ms" << endl;
-
-    // Solicitar al usuario que ingrese una palabra para buscar en el índice
-    string palabraBuscar; 
-    bool salir = false; 
-    do { 
-        cout << "Ingrese una palabra para buscar en el indice invertido (o '0' para terminar): ";
-        getline(cin, palabraBuscar); // leemos la palabra
-        
-        if (palabraBuscar == "0") { // si es 0, salimos del bucle
-            salir = true;
-        }
-        else { 
-            palabraBuscar = convertirMinuscula(palabraBuscar);
-
-            unordered_set<string> archivosEncontrados = procesarEntrada(trie,palabraBuscar); // buscamos la palabra y se almacena en archivosEncontrados
-            if (archivosEncontrados.empty()) {  
-                cout << "La palabra '" << palabraBuscar << "' no esta en el indice invertido." << endl;
-            }
-            else { // si el resultado no es vacío, imprime los documentos pertenecientes a la palabra
-                cout << "La palabra '" << palabraBuscar << "' esta en los documentos:" << endl;
-                
-                /* OPCION DE SALIDA 1 : lista de ids */
-                for (const string& id : archivosEncontrados) { cout << "- " << id << endl; }
-                
-                /* OPCION DE SALIDA 2 : JSON con todos los documentos encontrados */
-                //string resultadoJson = buscarDocumentosCompletos(docsCompletos, archivosEncontrados);
-                //cout << resultadoJson << endl;
-            }
-        }
-        
-    } while (!salir);
 
     return 0; 
 }

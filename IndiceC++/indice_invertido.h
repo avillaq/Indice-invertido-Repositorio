@@ -18,6 +18,7 @@ using namespace std;
 
 extern mutex mx;
 extern vector<unordered_map<string, vector<string>>> datosTotalesAgrupados;
+extern unordered_map<string,json> docsCompletos;
 
 // Nodo del Trie
 struct Node {
@@ -63,12 +64,15 @@ unordered_map<string, vector<string>> shuffle(vector<PalabraArchivo>& datosMapea
 // Reducir combinando listas de id de documentos para cada palabra usando un Trie
 void reducirDatos(unordered_map<string, vector<string>>& datosAgrupados, Trie& trie);
 
-unordered_set<string> procesarEntrada(Trie& trie, string& entrada);
+string procesarEntrada(Trie& trie, string& entrada);
 
 // Funcion para buscar los documentos completos
-string buscarDocumentosCompletos(unordered_map<string,json>& docsCompletos, unordered_set<string>& archivosEncontrados);
+string buscarDocumentosCompletos(unordered_set<string>& archivosEncontrados);
 
 // Esta funcion se ejecutara en paralelo
 void crearIndiceInvertido(unordered_map<string, string> archivosRecolectados, int inicio, int fin, unordered_set<string>& stopWords);
+
+// Iniciar el Indice Invertido
+int iniciar_indice_invertido(Trie& trie);
 
 #endif // INDICE_INVERTIDO_H

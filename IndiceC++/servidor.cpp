@@ -8,16 +8,17 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
-#include "./libraries/json.hpp"
+#include "indice_invertido.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
-using json = nlohmann::json;
 using namespace std;
 
 void manejarCliente(SOCKET clienteSocket) {
-    char buffer[1024] = {0};
+    char buffer[4096] = {0};
     srand(static_cast<unsigned int>(time(0))); // Seed para generar números aleatorios
+    Trie trie;
+    iniciar_indice_invertido(trie);
 
     while (true) {
         int valread = recv(clienteSocket, buffer, 1024, 0);
@@ -26,22 +27,9 @@ void manejarCliente(SOCKET clienteSocket) {
             break;
         }
 
+
         string entrada(buffer);
-        cout << "Mensaje recibido: " << entrada << endl;
-
-        // Generar N números aleatorios en función del tamaño del mensaje
-        int N = static_cast<int>(entrada.size());
-        vector<int> numerosAleatorios(N);
-        for (int i = 0; i < N; ++i) {
-            numerosAleatorios[i] = rand() % 100; // Números aleatorios entre 0 y 99
-        }
-
-        // Crear el objeto JSON de respuesta
-        json respuestaJson;
-        respuestaJson["resultados"] = numerosAleatorios;
-        respuestaJson["mensaje"] = entrada;
-
-        string respuesta = respuestaJson.dump();
+        string respuesta = procesarEntrada(trie,entrada);
 
         if (send(clienteSocket, respuesta.c_str(), static_cast<int>(respuesta.length()), 0) == -1) {
             cerr << "Error al enviar la respuesta" << endl;
