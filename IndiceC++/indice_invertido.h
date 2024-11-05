@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <thread>
 #include <mutex>
+#include <stack>
 #include "./libraries/json.hpp"
 
 using json = nlohmann::json;
@@ -32,7 +33,7 @@ private:
 public:
     Trie();
     void insertar(const string& palabra, const string& id_documento);
-    unordered_set<string> buscar(string& palabra);
+    unordered_set<string> buscar(const string& palabra);
 };
 
 // Función para convertir texto a minúsculas

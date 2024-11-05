@@ -5,11 +5,12 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+#include <thread>
+#include <mutex>
+#include <stack>
 #include "./libraries/json.hpp"
 using json = nlohmann::json;
 
-#include <thread>
-#include <mutex>
 using namespace std;
 
 mutex mx;
@@ -44,7 +45,7 @@ public:
     }
 
     // Buscar los archivos que contienen la palabra
-    unordered_set<string> buscar(string& palabra) {
+    unordered_set<string> buscar(const string& palabra) {
         Node* node = root; 
         for (char letra : palabra) { // para cada letra en nuestra palabra
             if (!node->children.count(letra)) { // si no existe un hijo con esa letra
@@ -145,39 +146,67 @@ void reducirDatos(unordered_map<string, vector<string>>& datosAgrupados, Trie& t
     }
 }
 
-unordered_set<string> procesarEntrada(Trie& trie ,string& entrada){ // procesa la entrada
+unordered_set<string> procesarEntrada(Trie& trie, string& entrada) {
     istringstream stream(entrada);
-    string palabra1; 
-    stream >> palabra1; // se extrae la primer palabra
-    string operador;
-    stream >> operador; // se extrae el operador
-    string palabra2;
-    stream >> palabra2; // se extrae la segunda palabra
+    string token;
+    vector<string> tokens;
+    
+    // Tokenizamos la entrada
+    while (stream >> token) {
+        tokens.push_back(token);
+    }
 
-    if (operador == "AND" || operador == "and") { // si es AND (deben estar si o si las 2 palabras)
-        // hacemos doble busqueda en el trie
-        unordered_set<string> archivosEncontrados1 = trie.buscar(palabra1); 
-        unordered_set<string> archivosEncontrados2 = trie.buscar(palabra2);
-        unordered_set<string> interseccionArchivos;
-        for (const string& ids : archivosEncontrados1) { // para los ids encontrados en la primera busqueda
-            // el metodo find devuelve un iterador al elemento si lo encuentra, si no, devuelve un iterador al final ( end() )
-            if (archivosEncontrados2.find(ids) != archivosEncontrados2.end()) {
-                interseccionArchivos.insert(ids); 
+    // Función auxiliar para realizar la operación AND
+    auto realizarAND = [](unordered_set<string>& set1, unordered_set<string>& set2) {
+        unordered_set<string> resultado;
+        for (const string& id : set1) {
+            if (set2.find(id) != set2.end()) {
+                resultado.insert(id);
             }
         }
-        return interseccionArchivos; // retorna la interseccionArchivos
-    } else if (operador == "OR" || operador == "or") { // si el operador es OR (debe contener almenos una de las palabras)
-        // hacemos doble busqueda en el trie
-        unordered_set<string> archivosEncontrados1 = trie.buscar(palabra1); 
-        unordered_set<string> archivosEncontrados2 = trie.buscar(palabra2);
-        
-        archivosEncontrados1.merge(archivosEncontrados2); // combina los resultados de ambas busquedas
-        return archivosEncontrados1;
-    } else {
-        unordered_set<string> archivosEncontrados1 = trie.buscar(palabra1); // busca la primer palabra
-        return archivosEncontrados1;
+        return resultado;
+    };
+
+    // Función auxiliar para realizar la operación OR
+    auto realizarOR = [](unordered_set<string>& set1, unordered_set<string>& set2) {
+        set1.insert(set2.begin(), set2.end());
+        return set1;
+    };
+
+    // Pilas para manejar las operaciones y los operandos
+    stack<unordered_set<string>> operandos;
+    stack<string> operadores;
+
+    for (const string& token : tokens) {
+        if (token == "AND" || token == "and" || token == "OR" || token == "or") {
+            operadores.push(token);
+        } else {
+            unordered_set<string> resultadoBusqueda = trie.buscar(token);
+            while (!operadores.empty() && (operadores.top() == "AND" || operadores.top() == "and")) {
+                string operador = operadores.top();
+                operadores.pop();
+                unordered_set<string> operandoAnterior = operandos.top();
+                operandos.pop();
+                resultadoBusqueda = realizarAND(operandoAnterior, resultadoBusqueda);
+            }
+            operandos.push(resultadoBusqueda);
+        }
     }
-    
+
+    // Procesar los operadores OR restantes
+    while (!operadores.empty()) {
+        string operador = operadores.top();
+        operadores.pop();
+        unordered_set<string> operando1 = operandos.top();
+        operandos.pop();
+        unordered_set<string> operando2 = operandos.top();
+        operandos.pop();
+        if (operador == "OR" || operador == "or") {
+            operandos.push(realizarOR(operando1, operando2));
+        }
+    }
+
+    return operandos.top();
 }
 
 // Funcion para buscar los documentos completos
@@ -294,13 +323,12 @@ int main() {
             else { // si el resultado no es vacío, imprime los documentos pertenecientes a la palabra
                 cout << "La palabra '" << palabraBuscar << "' esta en los documentos:" << endl;
                 
-                /*
-                for (const string& id : archivosEncontrados) {
-                    cout << "- " << id << endl;
-                }
-                */
-                string resultadoJson = buscarDocumentosCompletos(docsCompletos, archivosEncontrados);
-                cout << "Documentos encontrados: \n" << resultadoJson << endl;
+                /* OPCION DE SALIDA 1 : lista de ids */
+                for (const string& id : archivosEncontrados) { cout << "- " << id << endl; }
+                
+                /* OPCION DE SALIDA 2 : JSON con todos los documentos encontrados */
+                //string resultadoJson = buscarDocumentosCompletos(docsCompletos, archivosEncontrados);
+                //cout << resultadoJson << endl;
             }
         }
         
