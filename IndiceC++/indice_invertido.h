@@ -21,7 +21,7 @@ extern vector<unordered_map<string, vector<string>>> datosTotalesAgrupados;
 // Nodo del Trie
 struct Node {
     unordered_map<char, Node*> children; // hijo, contiene un caracter y una referencia a un hijo
-    unordered_set<string> nombresArchivos;  // archivos que contienen la palabra hasta ese punto
+    unordered_set<string> idDocumentos;  // id de documentos que contienen la palabra hasta ese punto
 };
 
 // Clase Trie
@@ -31,9 +31,12 @@ private:
 
 public:
     Trie();
-    void insertar(const string& palabra, const string& nombreArchivo);
+    void insertar(const string& palabra, const string& id_documento);
     unordered_set<string> buscar(string& palabra);
 };
+
+// Función para convertir texto a minúsculas
+string convertirMinuscula(string& text);
 
 // Función para eliminar signos de puntuación y saltos de linea
 string eliminarSignos(string& texto);
@@ -56,7 +59,7 @@ vector<PalabraArchivo> mapearArchivos(unordered_map<string, vector<string>>& arc
 // Organización de los datos intermedios: Agrupación por clave (palabra, palabra, ...)
 unordered_map<string, vector<string>> shuffle(vector<PalabraArchivo>& datosMapeados);
 
-// Reducir combinando listas de nombre de los archivos para cada palabra usando un Trie
+// Reducir combinando listas de id de documentos para cada palabra usando un Trie
 void reducirDatos(unordered_map<string, vector<string>>& datosAgrupados, Trie& trie);
 
 unordered_set<string> procesarEntrada(Trie& trie, string& entrada);

@@ -7,7 +7,7 @@ Trie::Trie() {
     root = new Node(); // constructor, crea nodo inicial
 }
 
-void Trie::insertar(const string& palabra, const string& nombreArchivo) { 
+void Trie::insertar(const string& palabra, const string& id_documento) { 
     Node* node = root;
     for (char letra : palabra) { // para cada letra en nuestra palabra
         if (!node->children.count(letra)) { // si existe aun un hijo con esa letra
@@ -15,7 +15,7 @@ void Trie::insertar(const string& palabra, const string& nombreArchivo) {
         }
         node = node->children[letra]; // nos movemos al nodo hijo que contiene la letra
     }
-    node->nombresArchivos.insert(nombreArchivo); // insertamos el nombre del archivo (final de palabra)
+    node->idDocumentos.insert(id_documento);
 }
 
 unordered_set<string> Trie::buscar(string& palabra) {
@@ -26,11 +26,19 @@ unordered_set<string> Trie::buscar(string& palabra) {
         }
         node = node->children[letra]; // nos movemos al nodo hijo que contiene la letra
     }
-    return node->nombresArchivos; // retorna los archivos a los que pertenece el ultimo nodo (final de palabra)
+    return node->idDocumentos; // retorna los documentos a los que pertenece el ultimo nodo (final de palabra)
+}
+
+string convertirMinuscula(string& texto) {
+    string nuevoTexto = texto;
+
+    // Transformamos el texto a minúsculas
+    transform(nuevoTexto.begin(), nuevoTexto.end(), nuevoTexto.begin(), ::tolower);
+    return nuevoTexto;
 }
 
 string eliminarSignos(string& texto) {
-    string nuevoTexto; // almacena el nuevo texto
+    string nuevoTexto;
     for (char caracter : texto) { // para cada caracter en el texto
         if (isalnum(caracter) || caracter == ' ') { // si es alfanumerico o espacio en blanco
             nuevoTexto += caracter; // lo añade a nuevoTexto
@@ -70,7 +78,6 @@ vector<PalabraArchivo> mapearArchivos(unordered_map<string, vector<string>>& arc
     PalabraArchivo pa; 
     vector<PalabraArchivo> datosMappeados;
 
-    // para cada id de documento y lista de palabras en los archivos procesados
     for (auto& [id_documento, listaPalabras] : archivosProcesados) { 
         for (string& palabra : listaPalabras) { // para cada palabra en la lista de palabras
             pa.palabra = palabra;
@@ -84,7 +91,7 @@ vector<PalabraArchivo> mapearArchivos(unordered_map<string, vector<string>>& arc
 unordered_map<string, vector<string>> shuffle(vector<PalabraArchivo>& datosMapeados) {
     unordered_map<string, vector<string>> datosAgrupados; //  (palabra - id de documento)
     for (auto& dato : datosMapeados) {
-        datosAgrupados[dato.palabra].push_back(dato.idDocumento); // la palabra se almacena como clave y el id de documento como valor
+        datosAgrupados[dato.palabra].push_back(dato.idDocumento);
     }
     return datosAgrupados; 
 }
@@ -92,7 +99,6 @@ unordered_map<string, vector<string>> shuffle(vector<PalabraArchivo>& datosMapea
 void reducirDatos(unordered_map<string, vector<string>>& datosAgrupados, Trie& trie) {
     for (auto& [palabra, id_documentos] : datosAgrupados) {
         for (auto& nom : id_documentos) {
-            // insertamos la palabra y los nombres de los archivos a los que pertenece en el Trie
             trie.insertar(palabra, nom); 
         }
     }
@@ -112,10 +118,10 @@ unordered_set<string> procesarEntrada(Trie& trie, string& entrada) { // procesa 
         unordered_set<string> archivosEncontrados1 = trie.buscar(palabra1); 
         unordered_set<string> archivosEncontrados2 = trie.buscar(palabra2);
         unordered_set<string> interseccionArchivos;
-        for (const string& nombres : archivosEncontrados1) { // para los nombres encontrados en la primera busqueda
+        for (const string& ids : archivosEncontrados1) { // para los ids encontrados en la primera busqueda
             // el metodo find devuelve un iterador al elemento si lo encuentra, si no, devuelve un iterador al final ( end() )
-            if (archivosEncontrados2.find(nombres) != archivosEncontrados2.end()) {
-                interseccionArchivos.insert(nombres); 
+            if (archivosEncontrados2.find(ids) != archivosEncontrados2.end()) {
+                interseccionArchivos.insert(ids); 
             }
         }
         return interseccionArchivos; // retorna la interseccionArchivos
@@ -136,7 +142,7 @@ void crearIndiceInvertido(unordered_map<string, string> archivosRecolectados, in
     unordered_map<string, vector<string>> archivosProcesados;
 
     auto it = archivosRecolectados.begin();
-    advance(it, inicio);
+    advance(it, inicio); // avanzamos el iterador al inicio
     for (int i = inicio; i < fin && it != archivosRecolectados.end(); ++i, ++it) {
         string id_documento = it->first;
         string texto = it->second;
@@ -146,7 +152,6 @@ void crearIndiceInvertido(unordered_map<string, string> archivosRecolectados, in
         archivosProcesados[id_documento] = palabrasFiltradas;
     }
 
-    // los mapeamos (pasan a estar en estructura PalabraArchivo contiene palabra e id de documento)
     vector<PalabraArchivo> datosMapeados = mapearArchivos(archivosProcesados);
     unordered_map<string, vector<string>> datosAgrupados = shuffle(datosMapeados);
 
@@ -218,14 +223,16 @@ int main() {
             salir = true;
         }
         else { 
+            palabraBuscar = convertirMinuscula(palabraBuscar);
+
             unordered_set<string> archivosEncontrados = procesarEntrada(trie,palabraBuscar); // buscamos la palabra y se almacena en archivosEncontrados
             if (archivosEncontrados.empty()) {  
                 cout << "La palabra '" << palabraBuscar << "' no esta en el indice invertido." << endl;
             }
             else { // si el resultado no es vacío, imprime los documentos pertenecientes a la palabra
                 cout << "La palabra '" << palabraBuscar << "' esta en los documentos:" << endl;
-                for (const string& nombres : archivosEncontrados) {
-                    cout << "- " << nombres << endl;
+                for (const string& ids : archivosEncontrados) {
+                    cout << "- " << ids << endl;
                 }
             }
         }
