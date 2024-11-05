@@ -5,7 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
-#include "json.hpp"
+#include "./libraries/json.hpp"
 using json = nlohmann::json;
 
 #include <thread>
@@ -204,7 +204,7 @@ int main() {
     auto start = chrono::high_resolution_clock::now();
 
     // Cargamos las palabras vacias del archivo
-    ifstream archivoEntrada("stop_words_spanish.txt");
+    ifstream archivoEntrada("stop_words.txt");
     unordered_set<string> stopWords;
     if (archivoEntrada) {
         string palabra;
@@ -217,7 +217,7 @@ int main() {
     }
 
     // Lectura de datos en archivo json
-    ifstream f("datos_repositorio.json");
+    ifstream f("./database/datos_repositorio.json");
     json data = json::parse(f);
     unordered_map<string, string> datosArchivos;
     for (auto& documento : data[2]["data"]) {
