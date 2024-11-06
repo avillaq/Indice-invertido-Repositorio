@@ -199,6 +199,7 @@ void crearIndiceInvertido(unordered_map<string, string> archivosRecolectados, in
         string id_documento = it->first;
         string texto = it->second;
         texto = eliminarSignos(texto);
+        texto = convertirMinuscula(texto);
         vector<string> listaPalabras = tokenizarTexto(texto);
         vector<string> palabrasFiltradas = eliminarStopWords(listaPalabras, stopWords);
         archivosProcesados[id_documento] = palabrasFiltradas;
