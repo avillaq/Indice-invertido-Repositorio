@@ -235,8 +235,11 @@ int iniciar_indice_invertido(Trie& trie) {
     json data = json::parse(f);
     unordered_map<string, string> datosArchivos;
     for (auto& documento : data[2]["data"]) {
-        docsCompletos[documento["id_documento"]] = documento;
         datosArchivos[documento["id_documento"]] = documento["resumen"];
+
+        documento.erase("resumen");
+        documento.erase("uri");
+        docsCompletos[documento["id_documento"]] = documento;
     }
     
     int numeroThreads = 8;
