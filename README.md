@@ -1,130 +1,99 @@
-# INTERFAZ DE INDICE INVERTIDO CON QTCREATOR
+# ÍNDICE INVERTIDO EN C++
 
 ## Descripción
 
-Este repositorio contiene dos aplicaciones desarrolladas en C++ utilizando Qt: `ii-cliente` y `ii-servidor`. Estas aplicaciones están diseñadas para comunicarse a través de sockets TCP, proporcionando una interfaz gráfica para el cliente y el servidor.
+Este repositorio contiene dos aplicaciones desarrolladas en C++: `cliente` y `servidor`. Estas aplicaciones están diseñadas para comunicarse a través de sockets TCP, proporcionando una implementación de índice invertido en consola.
 
 ## Tecnologías Usadas
 
 - **C++**: Lenguaje de programación principal.
-- **QtCreator**: Entorno de desarrollo integrado (IDE) utilizado para desarrollar la interfaz gráfica.
-- **QTcpSocket**: Clase de Qt utilizada para la comunicación a través de sockets TCP.
-- **QWidget**: Clase de Qt utilizada para crear las interfaces gráficas.
+- **Sockets TCP**: Para la comunicación entre cliente y servidor.
+- **JSON**: Para el manejo de datos estructurados.
+- **nlohmann/json**: Biblioteca para el manejo de JSON en C++.
 
 ## Estructura del Proyecto
 
-- `IndiceC++`: Primera implementación en consola del índice invertido.
-- `ii-cliente`: Código fuente del cliente desarrollado con QtCreator.
-- `ii-servidor`: Código fuente del servidor desarrollado con QtCreator.
-- `ejecutables`: Contiene los ejecutables del cliente y servidor para Linux y Windows.
+- `IndiceC++`: Implementación en consola del índice invertido.
+  - `database`: Datos para el índice invertido.
+  - `libraries`: Blibliotecas nlohmann/json utilizadas.
+  - `servidor.cpp`: Código fuente del servidor.
+  - `cliente.cpp`: Código fuente del cliente.
+  - `indice_invertido.cpp`: Implementación del índice invertido.
+  - `indice_invertido.h`: Declaraciones del índice invertido.
 
-## Instrucciones de Uso
+## Configuración y Ejecución
 
-### Opción 1: Usar los Ejecutables
+### Requisitos
 
-1. **Ubicar los ejecutables** en la carpeta `ejecutables`.
-2. **Descomprimir** los archivos `.zip` según tu sistema operativo (Linux o Windows):
-    - `ii-cliente-elf.zip` y `ii-servidor-elf.zip` para Linux.
-    - `ii-cliente-exe.zip` y `ii-servidor-exe.zip` para Windows.
-3. **Ejecutar** los archivos descomprimidos:
-    - En Linux: `./ii-cliente` y `./ii-servidor`.
-    - En Windows: `ii-cliente.exe` y `ii-servidor.exe`.
+- **Compilador C++**: Necesario para compilar el código fuente.
+- **Biblioteca nlohmann/json**: Para el manejo de JSON en C++.
 
-### Opción 2: Compilar el Código Fuente
+### Instrucciones de Compilación y Ejecución
 
-#### Pasos en Windows
+#### Índice Invertido en Consola
 
-1. **Instalar Qt y QtCreator**:
-    - Descarga e instala Qt desde [Qt Downloads](https://www.qt.io/download).
-    - Asegúrate de incluir el componente "MSVC" correspondiente a tu versión de Visual Studio.
-
-2. **Abrir el proyecto en QtCreator**:
-    - Navega a la carpeta `ii-cliente` o `ii-servidor`.
-
-3. **Compilar y ejecutar**:
-    - Haz clic en `Construir` > `Construir Proyecto` para compilar.
-    - Haz clic en `Ejecutar` para ejecutar el cliente o servidor.
-
-#### Pasos en Linux
-
-1. **Instalar Qt y QtCreator**:
-    - Abre una terminal y ejecuta los siguientes comandos:
+1. **Compilación**:
     ```bash
-    sudo apt-get update
-    sudo apt-get install qtcreator qt5-default build-essential
+    g++ servidor.cpp indice_invertido.cpp -o servidor -lws2_32
+    g++ cliente.cpp -o cliente -lws2_32
     ```
 
-3. **Compilar y ejecutar desde la consola**:
-    - Abre una terminal y navega a la carpeta `ii-cliente` o `ii-servidor`.
-    - Usa `qmake` para generar los archivos de construcción:
-      ```bash
-      qmake
-      ```
-    - Usa `make` para compilar el proyecto:
-      ```bash
-      make
-      ```
-    - Ejecuta el cliente o servidor:
-      ```bash
-      ./ii-cliente
-      ```
-      o
-      ```bash
-      ./ii-servidor
-      ```
+2. **Ejecución**:
+    - Ejecutar el servidor:
+        ```bash
+        ./servidor
+        ```
+    - Ejecutar el cliente:
+        ```bash
+        ./cliente
+        ```
 
-## Nota Importante
-
-### Uso de la Carpeta `textos`
-
-Esta nota importante se aplica únicamente si se decide compilar el código.
-
-Para el correcto funcionamiento del servidor, es necesario que la carpeta `textos`, que contiene los archivos de texto con los que trabaja el servidor, esté ubicada en el mismo directorio que el ejecutable generado por la compilación, tanto en Windows como en Linux. 
-
-#### Instrucciones
-
-1. **Compilación en Windows**:
-    - Después de compilar el servidor, copia la carpeta `textos` al mismo directorio donde se encuentra el ejecutable `ii-servidor.exe`. 
-    - Estructura esperada:
-    ```
-    ├── ii-servidor.exe
-    └── textos
-        ├── archivo.txt
-        └── ...
-    ```
-
-2. **Compilación en Linux**:
-    - Después de compilar el servidor, copia la carpeta `textos` al mismo directorio donde se encuentra el ejecutable `ii-servidor`. 
-    - Estructura esperada:
-    ```
-    ├── ii-servidor
-    └── textos
-        ├── archivo.txt
-        └── ...
-    ```
-
-### Índice Invertido en Consola
-
-La carpeta `IndiceC++` contiene la primera implementación del índice invertido en consola. Se puede encontrar el código fuente para probar esta funcionalidad básica.
-
-## Conexion entre multiple usuarios
+## Conexión entre Múltiples Usuarios
 
 ### Instrucciones
 
-    - Verficar si estan conectados en la misma red
-    - La direccion IP y puerto deben ser el mismo
-    
-1. **En Windows**
-    - Verificar IP Servidor dentro de Simbolo de Sistema en Windows con el comando
-        ```bash
-      ipconfig
-        ```
-    - Verificar que la IP sea la misma que IPv4
+1. **Verificar Conexión en la Misma Red**:
+    - Asegúrate de que todos los dispositivos estén conectados a la misma red.
 
+2. **Configurar Dirección IP y Puerto**:
+    - La dirección IP y el puerto deben ser los mismos en el cliente y el servidor.
 
-2. **En Linux**
-    - Verificar IP Servidor dentro de Bash en Linux
+#### En Windows
+
+1. **Verificar IP del Servidor**:
+    - Abre el Símbolo del Sistema y ejecuta el siguiente comando:
         ```bash
-      ifconfig
+        ipconfig
         ```
-    - Verificar que la IP sea la misma que IPv4
+    - Verifica que la IP sea la misma que la dirección IPv4.
+
+#### En Linux
+
+1. **Verificar IP del Servidor**:
+    - Abre una terminal y ejecuta el siguiente comando:
+        ```bash
+        ifconfig
+        ```
+    - Verifica que la IP sea la misma que la dirección IPv4.
+
+## Ejemplo de Uso
+
+1. **Iniciar el Servidor**:
+    - Ejecuta el servidor en la máquina designada como servidor.
+
+2. **Conectar el Cliente**:
+    - Ejecuta el cliente en otra máquina y conéctalo al servidor utilizando la dirección IP y el puerto configurados.
+
+3. **Enviar Consultas**:
+    - Ingresa las palabras a buscar en el cliente y envía la consulta al servidor.
+    - El servidor procesará la consulta y devolverá los resultados al cliente.
+
+## Problemas Comunes
+
+- **Error de Conexión**:
+    - Verifica que la dirección IP y el puerto sean correctos.
+    - Asegúrate de que el servidor esté en ejecución.
+    - Verifica la configuración del firewall.
+
+- **Datos Incompletos**:
+    - Asegúrate de que el cliente maneje correctamente la recepción de datos en fragmentos.
