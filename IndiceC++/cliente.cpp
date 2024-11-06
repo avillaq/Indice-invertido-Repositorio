@@ -12,7 +12,8 @@ int main() {
     WSADATA wsaData;
     SOCKET sock = INVALID_SOCKET;
     struct sockaddr_in serv_addr;
-    char buffer[4096] = {0};
+    const int recvBufferSize = 4096; // Tamaño del buffer para recibir datos
+    char buffer[recvBufferSize] = {0};
 
     // Inicializar Winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -54,9 +55,18 @@ int main() {
 
         send(sock, input.c_str(), input.length(), 0);
 
-        int valread = recv(sock, buffer, 4096, 0);
-        if (valread > 0) {
-            cout << "Archivos encontrados:\n" << buffer << endl;
+        // Recibir la respuesta en fragmentos
+        string respuestaCompleta;
+        int valread;
+        while ((valread = recv(sock, buffer, recvBufferSize, 0)) > 0) {
+            respuestaCompleta.append(buffer, valread);
+            if (valread < recvBufferSize) {
+                break; // Salir del bucle si se ha recibido el último fragmento
+            }
+        }
+
+        if (!respuestaCompleta.empty()) {
+            cout << "Archivos encontrados:\n" << respuestaCompleta << endl;
         } else {
             cout << "No se recibio respuesta del servidor." << endl;
         }

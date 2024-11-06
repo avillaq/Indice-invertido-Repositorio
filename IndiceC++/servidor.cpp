@@ -17,11 +17,13 @@ using namespace std;
 Trie trie;
 
 void manejarCliente(SOCKET clienteSocket) {
-    const int bufferSize = 4096;
-    char buffer[bufferSize] = {0};
-    
+    const size_t recvBufferSize = 1024; // Tamaño del buffer para recibir datos
+    char buffer[recvBufferSize] = {0};
+
+    const size_t sendBufferSize = 4096; // Tamaño del buffer para enviar datos
+
     while (true) {
-        int valread = recv(clienteSocket, buffer, bufferSize, 0);
+        int valread = recv(clienteSocket, buffer, recvBufferSize, 0);
         if (valread <= 0) {
             cerr << "Error al leer del socket o cliente desconectado" << endl;
             break;
@@ -31,10 +33,19 @@ void manejarCliente(SOCKET clienteSocket) {
         cout << "Mensaje recibido: " << entrada << endl;
         string respuesta = procesarEntrada(trie, entrada);
 
-        if (send(clienteSocket, respuesta.c_str(), static_cast<int>(respuesta.length()), 0) == -1) {
-            cerr << "Error al enviar la respuesta" << endl;
-            break;
+        // Respuesta en fragmentos
+        size_t totalSent = 0;
+        size_t respuestaLength = respuesta.length();
+        while (totalSent < respuestaLength) {
+            size_t fragmentSize = min(sendBufferSize, respuestaLength - totalSent);
+            int sent = send(clienteSocket, respuesta.c_str() + totalSent, static_cast<int>(fragmentSize), 0);
+            if (sent == -1) {
+                cerr << "Error al enviar la respuesta" << endl;
+                break;
+            }
+            totalSent += sent;
         }
+
         memset(buffer, 0, sizeof(buffer));
     }
 
