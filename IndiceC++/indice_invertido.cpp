@@ -239,6 +239,7 @@ int iniciar_indice_invertido(Trie& trie) {
 
         documento.erase("resumen");
         documento.erase("uri");
+        documento.erase("id_editor");
         docsCompletos[documento["id_documento"]] = documento;
     }
     

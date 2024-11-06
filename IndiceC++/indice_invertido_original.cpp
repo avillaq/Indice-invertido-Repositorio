@@ -276,6 +276,7 @@ int main() {
 
         documento.erase("resumen");
         documento.erase("uri");
+        documento.erase("id_editor");
         docsCompletos[documento["id_documento"]] = documento;
     }
     
