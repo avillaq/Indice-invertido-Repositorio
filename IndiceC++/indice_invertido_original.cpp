@@ -218,8 +218,8 @@ string buscarDocumentosCompletos(unordered_map<string,json>& docsCompletos, unor
         json doc = docsCompletos[id];
         docsEncontradosCompletos.push_back(doc);
     }
-    resultado["resultado"] = docsEncontradosCompletos;
-    resultado["tamaño_resultado"] = docsEncontradosCompletos.size();
+    resultado["resultados"] = docsEncontradosCompletos;
+    resultado["total"] = docsEncontradosCompletos.size();
     return resultado.dump(); // Convierte el JSON a string
 }
 

@@ -169,7 +169,10 @@ string procesarEntrada(Trie& trie, string& entrada) {
     unordered_set<string> archivosEncontrados = operandos.top();
 
     if (archivosEncontrados.empty()) {  
-        return "";
+        json resultadoJson;
+        resultadoJson["resultados"] = json::array();
+        resultadoJson["total"] = 0;
+        return resultadoJson.dump();
     }
     else { // si el resultado no es vacío, imprime los documentos pertenecientes a la palabra              
         string resultadoJson = buscarDocumentosCompletos(archivosEncontrados);
@@ -185,8 +188,8 @@ string buscarDocumentosCompletos(unordered_set<string>& archivosEncontrados) {
         json doc = docsCompletos[id];
         docsEncontradosCompletos.push_back(doc);
     }
-    resultado["resultado"] = docsEncontradosCompletos;
-    resultado["tamaño_resultado"] = docsEncontradosCompletos.size();
+    resultado["resultados"] = docsEncontradosCompletos;
+    resultado["total"] = docsEncontradosCompletos.size();
     return resultado.dump(); // Convierte el JSON a string
 }
 
