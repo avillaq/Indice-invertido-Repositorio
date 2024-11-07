@@ -220,16 +220,15 @@ int iniciar_indice_invertido(Trie& trie) {
     // Cargamos las palabras vacias del archivo
     ifstream archivoEntrada("stop_words.txt");
     unordered_set<string> stopWords;
-    if (archivoEntrada.is_open()) {
-        string palabra;
-        while (getline(archivoEntrada, palabra)) {
-            stopWords.insert(palabra);
-        }
-        archivoEntrada.close();
-    } else {
+    if (!archivoEntrada.is_open()) {
         cerr << "Error al abrir el archivo de palabras vacias." << endl;
         return 1;
     }
+    string palabra;
+    while (getline(archivoEntrada, palabra)) {
+        stopWords.insert(palabra);
+    }
+    archivoEntrada.close();
 
     // Lectura de datos en archivo json
     ifstream f("./database/datos_repositorio.json");

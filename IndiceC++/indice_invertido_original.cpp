@@ -255,20 +255,24 @@ int main() {
     // Cargamos las palabras vacias del archivo
     ifstream archivoEntrada("stop_words.txt");
     unordered_set<string> stopWords;
-    if (archivoEntrada) {
-        string palabra;
-        while (getline(archivoEntrada, palabra)) {
-            stopWords.insert(palabra);
-        }
-    } else {
+    if (!archivoEntrada.is_open()) {
         cerr << "Error al abrir el archivo de palabras vacias." << endl;
         return 1;
     }
+    string palabra;
+    while (getline(archivoEntrada, palabra)) {
+        stopWords.insert(palabra);
+    }
+    archivoEntrada.close();
 
     unordered_map<string,json> docsCompletos;
 
     // Lectura de datos en archivo json
     ifstream f("./database/datos_repositorio.json");
+    if (!f.is_open()) {
+        cerr << "Error al abrir el archivo de datos" << endl;
+        return 1;
+    }
     json data = json::parse(f);
     unordered_map<string, string> datosArchivos;
     for (auto& documento : data[2]["data"]) {
@@ -279,6 +283,7 @@ int main() {
         documento.erase("id_editor");
         docsCompletos[documento["id_documento"]] = documento;
     }
+    f.close();
     
     Trie trie;
     int numeroThreads = 8;
