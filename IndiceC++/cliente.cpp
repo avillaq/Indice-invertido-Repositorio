@@ -43,7 +43,7 @@ int main() {
         WSACleanup();
         return -1;
     }
-
+    cout << "Conectado al servidor" << endl;
     string input;
     while (true) {
         cout << "Ingrese las palabras a buscar (formato: palabra1 operador palabra2, o 'exit' para salir): ";

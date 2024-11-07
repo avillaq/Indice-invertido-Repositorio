@@ -97,7 +97,11 @@ int main() {
     }
 
     cout << "Creando el indice invertido..." << endl;
-    iniciar_indice_invertido(trie);
+    if (iniciar_indice_invertido(trie) != 0) {
+        cerr << "Error al crear el indice invertido" << endl;
+        closesocket(server_fd);
+        return 1;
+    }
     cout << "Indice invertido creado" << endl;
 
     char host[NI_MAXHOST];
