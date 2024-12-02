@@ -30,7 +30,9 @@ int main() {
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(8081);
 
-    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
+    // Ip servidor Local : 127.0.0.1
+    // Ip servidor Nube : 20.46.245.239
+    if (inet_pton(AF_INET, "20.46.245.239", &serv_addr.sin_addr) <= 0) {
         cout << "Invalid address/ Address not supported" << endl;
         closesocket(sock);
         WSACleanup();
